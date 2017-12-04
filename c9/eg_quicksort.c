@@ -3,7 +3,7 @@
 
 int medium(int a, int b, int c);
 void swap(int *pa, int *pb);
-void quicksort(int a[], int n);
+void quicksort(int a[], int left, int right);
 
 int main(void)
 {
@@ -41,8 +41,17 @@ int medium(int a, int b, int c)
 		return b > c ? (a > c ? a : c) : (a > c ? c : a);
 }
 
-void swap(int a[], int n)
+void quicksort(int a[], int left, int right)
 {
-	int middle;
+	int pivot;
+	pivot = medium(a[left], a[right], a[(left + right) / 2]);
+
+	while (a[left] <= pivot)
+		left++;
+	left++;
+
+	while (a[right] >= pivot)
+		right--;
+	right--;
 
 }
