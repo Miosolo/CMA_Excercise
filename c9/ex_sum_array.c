@@ -17,7 +17,6 @@ int main (void)
 		scanf("%d", &grades[i]);
 
 	printf("The sum is %d.\n", sum(grades, 10));
-	printf("%d", q);
 
 	return 0;
 }

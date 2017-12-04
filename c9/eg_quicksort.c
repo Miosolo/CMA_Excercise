@@ -1,5 +1,8 @@
 // quicksort under guideline of HackerRank
 #include <stdio.h>
+#include <stdlib.h>
+
+#define N 5
 
 int medium(int a, int b, int c);
 void swap(int *pa, int *pb);
@@ -7,18 +10,15 @@ void quicksort(int a[], int left, int right);
 
 int main(void)
 {
-	int n, num[n];
-	printf("Enter the array's length: ");
-	scanf("%d", &n);
-
+	int num[N];
 	printf("Please input the entire array: ");
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < N; i++)
 		scanf("%d", &num[i]);
 
-	quicksort(num, 0, n);
+	quicksort(num, 0, N);
 
 	printf("Sorted array: ");
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < N; i++)
 		printf("%d", num[i]);
 
 	return 0;
@@ -53,12 +53,14 @@ void quicksort(int a[], int left, int right)
 			right--;
 
 		swap(&a[left], &a[right]);
+		left++;
+		right--;
 	}
 
-	if (left - right == 1)
-	{
-		quicksort(a, start, left);
-		quicksort(a, right, end);
-	}
+	if (right - left == 1)
+		exit(0);
+
+	quicksort(a, start, left);
+	quicksort(a, right, end);
 
 }
