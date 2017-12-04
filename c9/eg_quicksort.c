@@ -1,6 +1,5 @@
 // quicksort under guideline of HackerRank
 #include <stdio.h>
-#include <stdlib.h>
 
 #define N 5
 
@@ -48,19 +47,24 @@ void quicksort(int a[], int left, int right)
 
 	while (right - left != 1)
 	{	while (a[left] < pivot)
-			left++;
+			do {left++;}
+				while (right - left >= 1);
 		while (a[right] > pivot)
-			right--;
+			do	{right--;}
+				while (right - left >= 1);
 
-		swap(&a[left], &a[right]);
-		left++;
-		right--;
+		if (right - left >= 1)
+		{
+			swap(&a[left], &a[right]);
+			left++;
+			right--;
+		}
 	}
 
-	if (right - left == 1)
-		exit(0);
 
-	quicksort(a, start, left);
-	quicksort(a, right, end);
+	if (left - start)
+		quicksort(a, start, left);
+	if (end - start)
+		quicksort(a, right, end);
 
 }
