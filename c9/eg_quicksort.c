@@ -7,16 +7,15 @@ void quicksort(int a[], int left, int right);
 
 int main(void)
 {
-	int n;
+	int n, num[n];
 	printf("Enter the array's length: ");
 	scanf("%d", &n);
 
-	int num[n];
 	printf("Please input the entire array: ");
 	for (int i = 0; i < n; i++)
 		scanf("%d", &num[i]);
 
-	quicksort(num, n);
+	quicksort(num, 0, n);
 
 	printf("Sorted array: ");
 	for (int i = 0; i < n; i++)
@@ -44,14 +43,22 @@ int medium(int a, int b, int c)
 void quicksort(int a[], int left, int right)
 {
 	int pivot;
+	int start = left, end = right;
 	pivot = medium(a[left], a[right], a[(left + right) / 2]);
 
-	while (a[left] <= pivot)
-		left++;
-	left++;
+	while (right - left != 1)
+	{	while (a[left] < pivot)
+			left++;
+		while (a[right] > pivot)
+			right--;
 
-	while (a[right] >= pivot)
-		right--;
-	right--;
+		swap(&a[left], &a[right]);
+	}
+
+	if (left - right == 1)
+	{
+		quicksort(a, start, left);
+		quicksort(a, right, end);
+	}
 
 }
