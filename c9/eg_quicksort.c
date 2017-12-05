@@ -14,11 +14,11 @@ int main(void)
 	for (int i = 0; i < N; i++)
 		scanf("%d", &num[i]);
 
-	quicksort(num, 0, N);
+	quicksort(num, 0, N - 1);
 
 	printf("Sorted array: ");
 	for (int i = 0; i < N; i++)
-		printf("%d", num[i]);
+		printf("%d ", num[i]);
 
 	return 0;
 }
@@ -45,7 +45,7 @@ void quicksort(int a[], int left, int right)
 	int start = left, end = right;
 	pivot = medium(a[left], a[right], a[(left + right) / 2]);
 
-	while (right - left != 1)
+/*	while (right - left != 1)
 	{	while (a[left] < pivot)
 			do {left++;}
 				while (right - left >= 1);
@@ -62,9 +62,11 @@ void quicksort(int a[], int left, int right)
 	}
 
 
-	if (left - start)
+	if (left != start)
 		quicksort(a, start, left);
-	if (end - start)
+	if (end != right)
 		quicksort(a, right, end);
+*/
+
 
 }
