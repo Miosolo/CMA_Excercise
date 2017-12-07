@@ -1,7 +1,8 @@
 // quicksort under guideline of HackerRank
 #include <stdio.h>
+#include <stdbool.h>
 
-#define N 5
+#define N 7
 
 int medium(int a, int b, int c);
 void swap(int *pa, int *pb);
@@ -40,33 +41,59 @@ int medium(int a, int b, int c)
 }
 
 void quicksort(int a[], int left, int right)
-{
-	int pivot;
-	int start = left, end = right;
-	pivot = medium(a[left], a[right], a[(left + right) / 2]);
+{	
+	//if 1 number
+	if (right - left == 0)
+		return;
 
-/*	while (right - left != 1)
-	{	while (a[left] < pivot)
-			do {left++;}
-				while (right - left >= 1);
-		while (a[right] > pivot)
-			do	{right--;}
-				while (right - left >= 1);
-
-		if (right - left >= 1)
+	//if 2 numbers(quicksort cannot solve)
+	if (right - left == 1)
+	{
+		if (a[left] > a[right])
 		{
 			swap(&a[left], &a[right]);
-			left++;
-			right--;
+			return;
 		}
+		else
+			return;
 	}
 
+	//my quicksort could arrange >=3 numbers
+	//initialize
+	int pivot, gap = right - left;
+	int start = left, end = right;
+	bool next_round = false;
 
-	if (left != start)
-		quicksort(a, start, left);
-	if (end != right)
-		quicksort(a, right, end);
-*/
+	pivot = medium(a[left], a[right], a[(left + right) / 2]);
 
+	//find numbers out of range
+	while (!next_round)
+	{	while (gap > 0 && a[left] <= pivot)
+		{
+			left++;
+			gap--;
+		}
+		while (gap > 0 && a[right] >= pivot)
+		{
+			right--;
+			gap--;
+		}
 
+		if (gap == 0)
+		{
+			left--;
+			next_round = true;
+		}
+
+		if (!next_round)
+		{
+			swap(&a[left], &a[right]);
+		}
+
+	}
+
+	quicksort(a, start, left);
+	quicksort(a, right, end);
+
+	return;
 }
