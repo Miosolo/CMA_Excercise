@@ -29,8 +29,10 @@ int main(void)
 {
 	//initialize
     generate_field();
+
+    bool finish = random_walk();
     
-    if (random_walk())
+    if (finish)
     {
         printf("Random trace (finished): \n\n");
         print_field();
