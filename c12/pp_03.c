@@ -1,61 +1,84 @@
 // reverse a sentence (using pointer v2)
 
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define MAX_LENGTH 300
+#define STACK_SIZE 200
 
-char sentence[MAX_LENGTH];
+char contents[STACK_SIZE];
 
-void input(int *ptop);
-void reverse_print(int *ptop);
-void push(int *ptop, char ch);
-char pop(int *ptop);
+void make_empty(int *top);
+bool is_empty(int top);
+bool is_full(int top);
+void push(char ch, int *top);
+char pop(int *top);
+void stack_overflow(void);
+void stack_underflow(void);
 
 int main(void)
 {
-    int top;
+    int top = 0;
+    char ch;
 
-    input(&top);
-    reverse_print(&top);
+    printf("Please input a sentence below:\n");
+    while ((ch = getchar()) != '\n' && (!is_full(top)))
+    {
+        push(ch, &top);
+    }
+
+    int valid_length = top;
+    printf("Reversed sentence:\n");
+    for (int i = 0; i < valid_length; i++)
+    {
+        printf("%c", pop(&top));
+    }
+    printf("\n");
 
     return 0;
 }
 
-void input(int *ptop)
+void make_empty(int *top)
 {
-    char temp;
-    *ptop = -1;
-
-    printf("Please enter a sentence below.\n");
-
-    while ((temp = getchar()) != '\n' && *ptop < MAX_LENGTH)
-    {
-        push(ptop, temp);
-    }
-
-    return;
+    *top = 0;
 }
 
-void reverse_print(int *ptop)
+bool is_empty(int top)
 {
-    printf("Reversed sentence:\n");
-    for (; *ptop >= 0;)
-    {
-        printf("%c", pop(ptop));
-    }
-    printf("\n");
-
-    return;
+    return top == 0;
 }
 
-void push(int *ptop, char ch)
+bool is_full(int top)
 {
-    *(sentence + (++(*ptop)))= ch;
-
-    return;
+    return top == STACK_SIZE;
 }
 
-char pop(int *ptop)
+void push(char ch, int *top)
 {
-    return *(sentence + ((*ptop)--));
+    if (is_full(*top))
+        stack_overflow();
+    else
+        *(contents + (*top)++) = ch;
+}
+
+char pop(int *top)
+{
+    if (is_empty(*top))
+        stack_underflow();
+    else
+        return *(contents + --(*top));
+
+    return '\0';
+}
+
+void stack_overflow(void)
+{
+    printf("Stack overflow\n");
+    exit(EXIT_FAILURE);
+}
+
+void stack_underflow(void)
+{
+    printf("Stack underflow\n");
+    exit(EXIT_FAILURE);
 }

@@ -14,9 +14,9 @@ int main(void)
 		sentence[i] = getchar();
 		if(sentence[i] == '\n')
 		{
-			sentence[i] = '\x0';
+			sentence[i] = '\0';
 			endchar = sentence[i - 1];
-			sentence[i - 1] = '\x0';
+			sentence[i - 1] = '\0';
 			goto start_reverse;
 		}
 	}
@@ -36,7 +36,7 @@ void reverse(char sentence[LENGTH], char endchar)
 	{
 		if(sentence[i] == ' ')
 		{
-			for(int j = i + 1; sentence[j] != ' ' && sentence[j] != '\x0'; j++)
+			for(int j = i + 1; sentence[j] != ' ' && sentence[j] != '\0'; j++)
 			{
 				rev_sentence[rev_counter++] = sentence[j];
 			}
@@ -44,7 +44,7 @@ void reverse(char sentence[LENGTH], char endchar)
 		}
 		else if(i == 0)
 		{
-			for(int j = 0; sentence[j] != ' ' && sentence[j] != '\x0'; j++)
+			for(int j = 0; sentence[j] != ' ' && sentence[j] != '\0'; j++)
 			{
 				rev_sentence[rev_counter++] = sentence[j];
 			}

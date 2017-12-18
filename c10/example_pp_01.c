@@ -1,14 +1,12 @@
-#include <stdbool.h>   /* C99 only */
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define STACK_SIZE 100
 
-/* external variables */
 char contents[STACK_SIZE];
 int top = 0;
 
-/* prototypes */
 void make_empty(void);
 bool is_empty(void);
 bool is_full(void);
@@ -69,7 +67,7 @@ char pop(void)
   else
     return contents[--top];
 
-  return '\0'; /* prevents compiler warning due to stack_underflow() call */
+  return '\0';
 }
 
 void stack_overflow(void)
