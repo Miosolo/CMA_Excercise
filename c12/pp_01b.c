@@ -7,66 +7,67 @@
 #define STACK_SIZE 200
 
 char contents[STACK_SIZE];
+int top = 0;
+char *pcontents = contents;
 
-void make_empty(int *top);
-bool is_empty(int top);
-bool is_full(int top);
-void push(char ch, int *top);
-char pop(int *top);
+void make_empty(void);
+bool is_empty(void);
+bool is_full(void);
+void push(char ch);
+char pop(void);
 void stack_overflow(void);
 void stack_underflow(void);
 
 int main(void)
 {
-    int top = 0;
     char ch;
 
     printf("Please input a sentence below:\n");
-    while ((ch = getchar()) != '\n' && (!is_full(top)))
+    while ((ch = getchar()) != '\n' && (!is_full()))
     {
-        push(ch, &top);
+        push(ch);
     }
 
     int valid_length = top;
     printf("Reversed sentence:\n");
     for (int i = 0; i < valid_length; i++)
     {
-        printf("%c", pop(&top));
+        printf("%c", pop());
     }
     printf("\n");
 
     return 0;
 }
 
-void make_empty(int *top)
+void make_empty(void)
 {
-    *top = 0;
+    top = 0;
 }
 
-bool is_empty(int top)
+bool is_empty(void)
 {
     return top == 0;
 }
 
-bool is_full(int top)
+bool is_full(void)
 {
     return top == STACK_SIZE;
 }
 
-void push(char ch, int *top)
+void push(char ch)
 {
-    if (is_full(*top))
+    if (is_full())
         stack_overflow();
     else
-        contents[(*top)++] = ch;
+        *(pcontents + top++) = ch;
 }
 
-char pop(int *top)
+char pop(void)
 {
-    if (is_empty(*top))
+    if (is_empty())
         stack_underflow();
     else
-        return contents[--(*top)];
+        return *(pcontents + --top);
 
     return '\0';
 }
