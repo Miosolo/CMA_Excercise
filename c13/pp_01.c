@@ -10,21 +10,22 @@ void max_min_string(char *str, char *minstr, char *maxstr);
 
 int main(void)
 {
-    char word[MAX_LENGTH], minstr[MAX_LENGTH], maxstr[MAX_LENGTH];
+    char word[MAX_LENGTH + 1], minstr[MAX_LENGTH + 1], maxstr[MAX_LENGTH + 1];
 
     for (int i = 0; ; i++)
     {
         printf("Please input a word(enter a 4-character word to stop): ");
         gets(word);
 
-        if ((int)(strlen(word)) == END_LENGTH)
-            break;
-        if (i == 0)
+        if (!i)
         {
             strcpy(maxstr, word);
             strcpy(minstr, word);
         }
-        else
+        if ((int)(strlen(word)) == END_LENGTH)
+            break;
+
+        if (i)
             max_min_string(word, minstr, maxstr);
     }
 
