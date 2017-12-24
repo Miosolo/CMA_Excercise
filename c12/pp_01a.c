@@ -1,82 +1,24 @@
-#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-#define STACK_SIZE 200
+#define MAX_LENGTH 200
 
-char contents[STACK_SIZE];
-int top = 0;
-
-void make_empty(void);
-bool is_empty(void);
-bool is_full(void);
-void push(char ch);
-char pop(void);
-void stack_overflow(void);
-void stack_underflow(void);
-
-int main(void)
+int main (void)
 {
-    char ch;
+    char sentence[MAX_LENGTH], ch;
+    int end;
 
-    printf("Please input a sentence below:\n");
-    while ((ch = getchar()) != '\n' && (!is_full()))
+    printf("Please enter a sentence below: \n");
+    for (end = 0; end < MAX_LENGTH && (ch = getchar()) != '\n'; end++)
     {
-        push(ch);
+        sentence[end] = ch;
     }
 
-    int valid_length = top;
-    printf("Reversed sentence:\n");
-    for (int i = 0; i < valid_length; i++)
+    printf("Reversed sentence: \n");
+    for (end--; end >= 0; end--)
     {
-        printf("%c", pop());
+        printf("%c", sentence[end]);
     }
     printf("\n");
 
     return 0;
-}
-
-void make_empty(void)
-{
-    top = 0;
-}
-
-bool is_empty(void)
-{
-    return top == 0;
-}
-
-bool is_full(void)
-{
-    return top == STACK_SIZE;
-}
-
-void push(char ch)
-{
-    if (is_full())
-        stack_overflow();
-    else
-        contents[top++] = ch;
-}
-
-char pop(void)
-{
-    if (is_empty())
-        stack_underflow();
-    else
-        return contents[--top];
-
-    return '\0';
-}
-
-void stack_overflow(void)
-{
-    printf("Stack overflow\n");
-    exit(EXIT_FAILURE);
-}
-
-void stack_underflow(void)
-{
-    printf("Stack underflow\n");
-    exit(EXIT_FAILURE);
 }
