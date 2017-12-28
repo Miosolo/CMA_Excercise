@@ -13,10 +13,10 @@
 #define DELETE 2
 #define SEARCH 3
 #define INSERT 4
-#define CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/GoodsInfo.csv"
+#define CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfo.csv" //最后改成相对路径
 
 //---------structs-------------
-struct Info
+struct info
 {
     int id;
     char name[MAX_NAME_LENGTH + 1];
@@ -24,35 +24,42 @@ struct Info
     double discount;
     int amount;
     int remain;
-}*GoodsInfo[MAX_GOODS_KIND];
+};
+struct info *goodsInfo[MAX_GOODS_KIND] = {NULL};
 
 //----------prototypes----------
-
-void read_cvs(FILE *);
+int readCvs(FILE *pFile);
+int chooseFunction(void);
+void searchGoods(void);
+int writeCvs(FILE *pFile);
 
 int main(void)
 {
-    FILE *ptable;
-    if ((ptable = fopen(CSV_PATH, "r+")) == NULL)
-    {   
-        printf("错误：找不到所需的cvs文件\n")
+    FILE *pTable;
+    if ((pTable = fopen(CSV_PATH, "r+")) == NULL)
+    {
+        printf("错误：找不到所需的cvs文件\n");
         return 0;
     }
 
-    read_cvs(ptable);
+    if (readCvs(pTable) == EXIT_FAILURE)
+    {
+        printf("程序启动失败\n");
+        return 0;
+    }
 
     //----------use functions------------
     printf("超市商品管理系统\n");
-    bool stay_in = true;
-    while (stay_in)
+    /*bool StayIn = true;
+    while (StayIn)
     {
-        switch (choose_function())
+        switch (chooseFunction())
         {
         case ALTER:
-            edit_goods();
+            editGoods();
             break;
         case SEARCH:
-            search_goods();
+            searchGoods();
             break;
         case DELETE:
             delete ();
@@ -61,60 +68,72 @@ int main(void)
             insert();
             break;
         default:
-            stay_in = false;
+            StayIn = false;
             break;
         }
     }
-
+    */
     //-----------shut down the system-----------
-    write_cvs(ptable);
-    if (fclose(ptable) == EXIT_SUCCESS)
+    if (writeCvs(pTable) == EXIT_FAILURE)
+    {
+        printf("保存数据失败\n");
+        return 0;
+    }
+
+    if (fclose(pTable) == EXIT_SUCCESS)
         printf("成功退出系统\n");
+
     return 0;
 }
 
-void read_cvs(FILE *pfile)
+int readCvs(FILE *pFile)
 {
-    struct Info *current_goods = GoodsInfo;
-    char *buffer = (char *)malloc(MAX_DATA_LINE_LENGTH + 1);
+    char *buffer = (char *)malloc((long)MAX_DATA_LINE_LENGTH * sizeof(char));
+    if (buffer == NULL)
+        return EXIT_FAILURE;
 
-    rewind(pfile);
-    fgets(buffer, MAX_DATA_LINE_LENGTH, pfile);//skip the fist line (headers)
-    while ((current_goods < &GoodsInfo[200]) && (fgets(buffer, MAX_DATA_LINE_LENGTH, pfile) != NULL))
+    rewind(pFile);
+    fgets(buffer, MAX_DATA_LINE_LENGTH, pFile); //skip the fist line (headers)
+    for (int i = 0; i < MAX_GOODS_KIND && fgets(buffer, MAX_DATA_LINE_LENGTH, pFile) != NULL; i++)
     {
-        *current_goods = malloc
-        for (int i = 0; i < 6; i++) //a kind of goods has 6 properties
+        goodsInfo[i] = (struct info *)malloc((long)sizeof(struct info));
+        if (goodsInfo[i] == NULL)
+            return EXIT_FAILURE;
+
+        for (int i = 0; i < 6; i++) //every kind of goods has 6 properties
         {
             switch (i)
             {
-                case 0:
-                    (*current_goods).id = atoi(strtok(buffer, CSV_SEPARATOR));
-                    break;
-                case 1:
-                    strcpy((*current_goods).name, strtok(NULL, CSV_SEPARATOR));
-                    break;
-                case 2:
-                    (*current_goods).price = atof(strtok(NULL, CSV_SEPARATOR));
-                    break;
-                case 3:
-                    (*current_goods).discount = atof(strtok(NULL, CSV_SEPARATOR));
-                    break;
-                case 4:
-                    (*current_goods).amount = atoi(strtok(NULL, CSV_SEPARATOR));
-                    break;
-                case 5:
-                    (*current_goods).remain = atoi(strtok(NULL, CSV_SEPARATOR));
-                    break;
+            case 0:
+                goodsInfo[i]->id = atoi(strtok(buffer, CSV_SEPARATOR));
+                break;
+            case 1:
+                //strcpy(goodsInfo[i]->name, strtok(NULL, CSV_SEPARATOR));
+                strcpy(goodsInfo[i]->name, "Apple");
+                break;
+            case 2:
+                goodsInfo[i]->price = atof(strtok(NULL, CSV_SEPARATOR));
+                break;
+            case 3:
+                goodsInfo[i]->discount = atof(strtok(NULL, CSV_SEPARATOR));
+                break;
+            case 4:
+                goodsInfo[i]->amount = atoi(strtok(NULL, CSV_SEPARATOR));
+                break;
+            case 5:
+                goodsInfo[i]->remain = atoi(strtok(NULL, CSV_SEPARATOR));
+                break;
             }
         }
-        current_goods++;
     }
 
     free(buffer);
-    return;
+    buffer = NULL;
+
+    return EXIT_SUCCESS;
 }
 
-int choose_function(void)
+int chooseFunction(void)
 {
     int choice;
 
@@ -132,23 +151,31 @@ int choose_function(void)
     return choice;
 }
 
-void search_goods(void)
+void searchGoods(void)
 {
     return;
 }
 
-void write_cvs(FILE *pfile)
+int writeCvs(FILE *pFile)
 {
-    char *buffer = (char *)malloc(MAX_DATA_LINE_LENGTH + 1);
-    rewind(pfile);
-    fgets(buffer, MAX_DATA_LINE_LENGTH, pfile);//skip the fist line (headers)
+    char *buffer = (char *)malloc((long)MAX_DATA_LINE_LENGTH * sizeof(char));
+    if (buffer == NULL)
+        return EXIT_FAILURE;
 
-    struct Info *current_goods;
-    for (current_goods = GoodsInfo; (*current_goods).name[0];current_goods++)
+    rewind(pFile);
+    fgets(buffer, MAX_DATA_LINE_LENGTH, pFile); //skip the fist line (headers)
+
+    for (int i = 0; i < MAX_GOODS_KIND && goodsInfo[i] != NULL; i++)
     {
-        fprintf(pfile, "%d,%s,%.2f,%.2f,%d,%d\n", (*current_goods).id, (*current_goods).name, (*current_goods).price, (*current_goods).discount, (*current_goods).amount, (*current_goods).remain);
+        fprintf(pFile, "%d,%s,%.2f,%.2f,%d,%d\n", goodsInfo[i]->id, goodsInfo[i]->name, goodsInfo[i]->price,
+                goodsInfo[i]->discount, goodsInfo[i]->amount, goodsInfo[i]->remain);
+
+        free(goodsInfo[i]);
+        goodsInfo[i] = NULL;
     }
 
     free(buffer);
-    return;
+    buffer = NULL;
+
+    return EXIT_SUCCESS;
 }
