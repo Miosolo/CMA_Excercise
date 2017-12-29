@@ -1,4 +1,2 @@
-ID,Name,Price,Discount,Amount,Remain
-4973,Soda,0.99,0.95,1000,337
-10086,Apple,2.35,0.87,300,143
-24553,Cookies,4.99,1,55,12
+ID,Name,Price,Discount(%),Amount,Remain
+10086,Apple,2.800,20.000,3422,342

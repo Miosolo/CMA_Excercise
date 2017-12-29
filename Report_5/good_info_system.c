@@ -13,7 +13,9 @@
 #define DELETE 2
 #define SEARCH 3
 #define INSERT 4
-#define CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfo.csv" //最后改成相对路径
+#define CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfo.csv"//最后改成相对路径
+#define TMP_CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfoTmp.csv"//最后改成相对路径
+#define SYS_ERROR_MSG "System error, please try again.\n"
 
 //---------structs-------------
 struct info
@@ -44,15 +46,17 @@ void printPause(void);
 int main(void)
 {
     FILE *pTable;
-    if ((pTable = fopen(CSV_PATH, "r+")) == NULL)
+    if ((pTable = fopen(CSV_PATH, "r")) == NULL)
     {
         printf("Error: Cannot find the .cvs file.\n");
+        printPause();
         return 0;
     }
 
-    if (readCvs(pTable) == EXIT_FAILURE)
+    if (readCvs(pTable) == EXIT_SUCCESS)
+        ;
+    else
     {
-        printf("Error: Fail to read data from the .cvs file.\n");
         return 0;
     }
 
@@ -82,35 +86,67 @@ int main(void)
     }
 
     //-----------shut down the system-----------
-    if (writeCvs(pTable) == EXIT_FAILURE)
+    if (writeCvs(pTable) == EXIT_SUCCESS)
+        ;
+    else
     {
-        printf("Error: Cannot save the data.\n");
+        printf("Severe Error: Cannot save your changes.\n");
+        printPause();
         return 0;
     }
 
-    if (fclose(pTable) == EXIT_FAILURE)
+    fclose(pTable);
+    pTable = NULL;
+
+    //----------replace the old fie---------
+    if (remove(CSV_PATH) == EXIT_SUCCESS)
     {
-        printf("Error: Fail to exit the system.\n");
-        return 0;
+        if (rename(TMP_CSV_PATH, CSV_PATH) == EXIT_SUCCESS)
+            ;
+        else
+        {
+            printf("Severe Error: Cannot save your changes.\n");
+            printPause();
+            return 0;
+        }
     }
 
-    printf("Successfully exit the system\n");
+    else
+    {
+        printf("Severe Error: Cannot save your changes.\n");
+        printPause();
+        return 0;
+    }
+    printf("Successfully exit the system.\n");
+
     return 0;
 }
 
 int readCvs(FILE *pFile)
 {
     char *buffer = (char *)malloc((long)MAX_DATA_LINE_LENGTH * sizeof(char));
-    if (buffer == NULL)
+    if (buffer != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
         return EXIT_FAILURE;
+    }
 
     rewind(pFile);
     fgets(buffer, MAX_DATA_LINE_LENGTH, pFile); //skip the fist line (headers)
     for (int kind = 0; kind < MAX_GOODS_KIND && fgets(buffer, MAX_DATA_LINE_LENGTH, pFile) != NULL; kind++)
     {
         goodsInfo[kind] = (struct info *)malloc((long)sizeof(struct info));
-        if (goodsInfo[kind] == NULL)
+        if (goodsInfo[kind] != NULL)
+            ;
+        else
+        {
+            printf(SYS_ERROR_MSG);
+            printPause();
             return EXIT_FAILURE;
+        }
 
         for (int i = 0; i < 6; i++) //every kind of goods has 6 properties
         {
@@ -167,11 +203,10 @@ void searchGoods(void)
 {
     int targetGoods = searchPort();
 
-    if (targetGoods == MAX_GOODS_KIND)
-        return;
-    else
+    if (targetGoods != MAX_GOODS_KIND)
     {
         printGoods(targetGoods);
+        printPause();
     }
 
     return;
@@ -194,7 +229,9 @@ int searchPort(void)
 
         printf("\nEnter the ID: ");
         scanf("%ld", &targetId);
-        if ((targetGoods = searchId(targetId)) == MAX_GOODS_KIND)
+        if ((targetGoods = searchId(targetId)) != MAX_GOODS_KIND)
+            ;
+        else
         {
             printf("No result found.\n");
             printPause();
@@ -206,7 +243,9 @@ int searchPort(void)
         char targetName[MAX_NAME_LENGTH + 1];
         printf("\nEnter the name: ");
         scanf("%s", targetName);
-        if ((targetGoods = searchName(targetName)) == MAX_GOODS_KIND)
+        if ((targetGoods = searchName(targetName)) != MAX_GOODS_KIND)
+            ;
+        else
         {
             printf("No result found.\n");
             printPause();
@@ -240,10 +279,9 @@ void printGoods(int printTarget)
         "Current Price: %.3f\n"
         "Amount: %d\t\tRemain: %d\n\n"
         "**********************************\n",
-        goodsInfo[printTarget]->name, goodsInfo[printTarget]->id, goodsInfo[printTarget]->price, (1 - goodsInfo[printTarget]->discount) * 100, goodsInfo[printTarget]->price * goodsInfo[printTarget]->discount,
+        goodsInfo[printTarget]->name, goodsInfo[printTarget]->id, goodsInfo[printTarget]->price, goodsInfo[printTarget]->discount, goodsInfo[printTarget]->price * (1 - goodsInfo[printTarget]->discount / 100),
         goodsInfo[printTarget]->amount, goodsInfo[printTarget]->remain);
 
-    printPause();
     return;
 }
 
@@ -275,6 +313,94 @@ int searchName(char *name)
 
 void editGoods(void)
 {
+    int editTarget = searchPort();
+    if (editTarget == MAX_GOODS_KIND)
+        return;
+    printGoods(editTarget);
+
+    char *buffer = malloc((long)MAX_NAME_LENGTH * sizeof(char));
+    if (buffer != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
+        return;
+    }
+
+    printf("Enter the new value, press enter key to skip.\n");
+
+    for (int i = 0; i < 6; i++)
+    {
+        switch (i)
+        {
+        case 0:
+            printf("ID: ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                goodsInfo[editTarget]->id = atol(buffer);
+            break;
+
+        case 1:
+            printf("Name: ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                strcpy(goodsInfo[editTarget]->name, buffer);
+            break;
+
+        case 2:
+            printf("Price: ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                goodsInfo[editTarget]->price = atof(buffer);
+            break;
+
+        case 3:
+            printf("Discount(%%): ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                goodsInfo[editTarget]->discount = atof(buffer);
+            break;
+
+        case 4:
+            printf("Amount: ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                goodsInfo[editTarget]->amount = atoi(buffer);
+            break;
+        
+        case 5:
+            printf("Remain: ");
+            fflush(stdin);
+            gets(buffer);
+            if (*buffer == '\0')
+                break;
+            else
+                goodsInfo[editTarget]->remain = atoi(buffer);
+            break;
+       }
+    }
+
+    free(buffer);
+    buffer = NULL;
+
+    printf("Successfully updated the information.\n");
+    printPause();
     return;
 }
 
@@ -282,9 +408,7 @@ void delete (void)
 {
     int deleteTarget = searchPort();
 
-    if (deleteTarget == MAX_GOODS_KIND)
-        return;
-    else
+    if (deleteTarget != MAX_GOODS_KIND)
     {
         printf("Are you sure to delete this item: %s, ID: %ld? (Y/y to confirm)\n", goodsInfo[deleteTarget]->name, goodsInfo[deleteTarget]->id);
         char choice;
@@ -303,41 +427,113 @@ void delete (void)
 
         printPause();
     }
+
     return;
 }
 
 void insert(void)
 {
+    int insertTarget = -1;
+    while(goodsInfo[++insertTarget] != NULL)
+        ;
+    goodsInfo[insertTarget] = (struct info *)malloc((long)sizeof(struct info));
+    if (goodsInfo[insertTarget] != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
+        return;
+    }
+
+    printf("Insert new data: \n");
+    for (int i = 0; i < 6; i++)
+    {
+        switch (i)
+        {
+        case 0:
+            printf("ID: ");
+            scanf("%ld", &(goodsInfo[insertTarget]->id));
+            break;
+
+        case 1:
+            printf("Name: ");
+            fflush(stdin);
+            char *buffer = (char *)malloc((long)MAX_NAME_LENGTH * sizeof(char));
+            if (buffer != NULL)
+                ;
+            else
+            {
+                printf(SYS_ERROR_MSG);
+                printPause();
+                free(goodsInfo[insertTarget]);
+                goodsInfo[insertTarget] = NULL;
+                
+                return;
+            }
+            gets(buffer);
+            strcpy(goodsInfo[insertTarget]->name, buffer);
+            free(buffer);
+            buffer = NULL;
+            break;
+        
+        case 2:
+            printf("Price: ");
+            scanf("%lf", &(goodsInfo[insertTarget]->price));
+            break;
+
+        case 3:
+            printf("Discount: ");
+            scanf("%lf", &(goodsInfo[insertTarget]->discount));
+            break;
+
+        case 4:
+            printf("Amount: ");
+            scanf("%d", &(goodsInfo[insertTarget]->amount));
+            break;
+
+        case 5:
+            printf("Remain: ");
+            scanf("%d", &(goodsInfo[insertTarget]->remain));
+            break;
+        }
+    }
+
+    printf("Successfully added the new item.\n");
+    printPause();
     return;
 }
 
 int writeCvs(FILE *pFile)
 {
-    char *buffer = (char *)malloc((long)MAX_DATA_LINE_LENGTH * sizeof(char));
-    if (buffer == NULL)
-        return EXIT_FAILURE;
-
-    rewind(pFile);
-    fgets(buffer, MAX_DATA_LINE_LENGTH, pFile); //skip the fist line (headers)
-
-    for (int kind = 0; kind < MAX_GOODS_KIND; kind++)
+    FILE *pTmp = fopen(TMP_CSV_PATH, "w");
+    if (pTmp == NULL)
     {
-        if (goodsInfo[kind] != NULL)
-        {
-            fprintf(pFile, "%ld,%s,%.3f,%.3f,%d,%d\n", goodsInfo[kind]->id, goodsInfo[kind]->name, goodsInfo[kind]->price,
-                    goodsInfo[kind]->discount, goodsInfo[kind]->amount, goodsInfo[kind]->remain);
-
-            free(goodsInfo[kind]);
-            goodsInfo[kind] = NULL;
-        }
-        else
-        {
-            fprintf(pFile, "\n");
-        }
+        printf("Error: Cannot write the new file.\n");
+        printPause();
+        return EXIT_FAILURE;
     }
 
-    free(buffer);
-    buffer = NULL;
+    rewind(pTmp);
 
+    fprintf(pTmp, "ID,Name,Price,Discount(%%),Amount,Remain\n");
+    for (int kind = 0; kind < MAX_GOODS_KIND && goodsInfo[kind] != NULL; kind++)
+    {
+        fprintf(pTmp, "%ld,%s,%.3f,%.3f,%d,%d\n", goodsInfo[kind]->id, goodsInfo[kind]->name, 
+                goodsInfo[kind]->price, goodsInfo[kind]->discount, goodsInfo[kind]->amount, goodsInfo[kind]->remain);
+
+        free(goodsInfo[kind]);
+        goodsInfo[kind] = NULL;
+    }
+
+    if (fclose(pTmp) == EXIT_FAILURE)
+    {
+        printf("Error: Cannot save the new file.\n");
+        pTmp = NULL;
+        printPause();
+        return EXIT_FAILURE;
+    }
+
+    pTmp = NULL;
     return EXIT_SUCCESS;
 }
