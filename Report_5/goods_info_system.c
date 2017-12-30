@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -512,7 +511,7 @@ void insertGoods(void)
             break;
 
         case 3:
-            printf("Discount: ");
+            printf("Discount(%%): ");
             double discountTmp;
             scanf("%lf", &discountTmp);
             if (discountTmp >100)
@@ -609,7 +608,7 @@ void showAllGoods(void)
     (
         "Goods details (sorted by original price)\n"
         SEPARATE_RULE
-        "ID\tName\tOrigianal Price\tDiscount\tCurrent Price\tAmount\tRemain\n"
+        "ID\tName\tOrigianal Price\tDiscount(%%)\tCurrent Price\tAmount\tRemain\n"
     );
     for (int i = 0; i < kindAmount; i++)
     {
