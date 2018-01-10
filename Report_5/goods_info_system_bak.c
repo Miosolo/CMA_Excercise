@@ -4,13 +4,13 @@
 #include <string.h>
 
 //---------define--------------
-#define MAX_GOODS_KIND 200
+#define MAX_GOODS_KIND 2000
 #define MAX_NAME_LENGTH 50
 #define MAX_DATA_LINE_LENGTH 200
 #define CSV_SEPARATOR ","
-#define CSV_PATH "./goodsInfo.csv"
-#define TMP_CSV_PATH "./goodsInfoTmp.csv"
-#define SYS_ERROR_MSG "系统出错，请重试\n"
+#define CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfo.csv"
+#define TMP_CSV_PATH "C:/Users/mx_028/Dropbox/Programming/C/CMA_Excercise/Report_5/goodsInfoTmp.csv"
+#define SYS_ERROR_MSG "System error, please try again.\n"
 #define SEPARATE_RULE "*************************************************************************************\n"
 
 //---------structs-------------
@@ -39,17 +39,17 @@ void insertGoods(void);
 void searchGoods(void);
 void printPause(void);
 void showAllGoods(void);
-void bubbleSort(void);
-void swapStruct(int a, int b);
+void swapP(int a, int b);
+int mediumP(int a, int b, int c);
+void quickSortP(int left, int right);
 void printGoodsLine(int printTarget);
-void clearInput(void);
 
 int main(void)
 {
     FILE *pTable;
     if ((pTable = fopen(CSV_PATH, "r")) == NULL)
     {
-        printf("错误：找不到所需的cvs表格\n");
+        printf("Error: Cannot find the .cvs file.\n");
         printPause();
         return 0;
     }
@@ -62,7 +62,7 @@ int main(void)
     }
 
     //----------use functions------------
-    printf("\n超市商品管理系统\n\n");
+    printf("\nSupermarket Commodity Management System\n\n");
     bool StayIn = true;
     while (StayIn)
     {
@@ -94,7 +94,7 @@ int main(void)
         ;
     else
     {
-        printf("出现严重错误，无法保存您的数据\n");
+        printf("Severe Error: Cannot save your changes.\n");
         printPause();
         return 0;
     }
@@ -109,33 +109,47 @@ int main(void)
             ;
         else
         {
-            printf("出现严重错误，无法保存您的数据\n");
+            printf("Severe Error: Cannot save your changes.\n");
             printPause();
             return 0;
         }
     }
     else
     {
-        printf("出现严重错误，无法保存您的数据\n");
+        printf("Severe Error: Cannot save your changes.\n");
         printPause();
         return 0;
     }
 
-    printf("您已顺利退出系统\n");
-    printPause();
-
+    printf("Successfully exit the system.\n");
     return 0;
 }
 
 int readCvs(FILE *pFile)
 {
     char *buffer = (char *)malloc((long)MAX_DATA_LINE_LENGTH * sizeof(char));
+    if (buffer != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
+        return EXIT_FAILURE;
+    }
 
     rewind(pFile);
     fgets(buffer, MAX_DATA_LINE_LENGTH, pFile); //skip the fist line (headers)
     for (int kind = 0; kind < MAX_GOODS_KIND && fgets(buffer, MAX_DATA_LINE_LENGTH, pFile) != NULL; kind++)
     {
         goodsInfo[kind] = (struct info *)malloc((long)sizeof(struct info));
+        if (goodsInfo[kind] != NULL)
+            ;
+        else
+        {
+            printf(SYS_ERROR_MSG);
+            printPause();
+            return EXIT_FAILURE;
+        }
 
         for (int i = 0; i < 6; i++) //every kind of goods has 6 properties
         {
@@ -175,15 +189,15 @@ int chooseFunction(void)
 
     printf(
         SEPARATE_RULE
-        "请选择您想要执行的功能\n"
-        "1：编辑商品信息\n"
-        "2：搜索商品信息\n"
-        "3：删除商品信息\n"
-        "4：插入商品信息\n"
-        "5：显示所有商品信息\n"
-        "其他：保存数据并退出系统\n"
+        "Please choose what to do with the information of goods:\n"
+        "1: Edit\n"
+        "2: Delete\n"
+        "3: Search\n"
+        "4: Insert new\n"
+        "5: Show all\n"
+        "Otherwise: Exit the system\n"
         SEPARATE_RULE
-        "请输入您的选择：");
+        "Enter your choice: ");
     scanf("%d", &choice);
 
     return choice;
@@ -207,23 +221,23 @@ int searchPort(void)
     int targetGoods = MAX_GOODS_KIND, mode;
 
     printf(
-        "\n请选择搜索依据：\n"
-        "1：商品ID\n"
-        "2：商品名称\n"
-        "请输入您的选择：");
+        "\nChoose the searching mode:\n"
+        "1: Item ID\n"
+        "2: Item name\n"
+        "Enter your choice: ");
     scanf("%d", &mode);
 
     if (mode == 1)
     {
         long targetId;
 
-        printf("\n请输入商品ID：");
+        printf("\nEnter the ID: ");
         scanf("%ld", &targetId);
         if ((targetGoods = searchId(targetId)) != MAX_GOODS_KIND)
             ;
         else
         {
-            printf("找不到相应商品\n");
+            printf("No result found.\n");
             printPause();
             return MAX_GOODS_KIND;
         }
@@ -231,20 +245,20 @@ int searchPort(void)
     else if (mode == 2)
     {
         char targetName[MAX_NAME_LENGTH + 1];
-        printf("\n请输入商品名称：");
+        printf("\nEnter the concret name: ");
         scanf("%s", targetName);
         if ((targetGoods = searchName(targetName)) != MAX_GOODS_KIND)
             ;
         else
         {
-            printf("找不到相应商品\n");
+            printf("No result found.\n");
             printPause();
             return MAX_GOODS_KIND;
         }
     }
     else
     {
-        printf("请输入正确的选项\n");
+        printf("Please enter the right choice.\n");
     }
 
     return targetGoods;
@@ -252,8 +266,8 @@ int searchPort(void)
 
 void printPause(void)
 {
-    printf("\n按任意键继续\n");
-    clearInput();
+    printf("\nPress any key to continue.\n");
+    fflush(stdin);
     getchar();
 
     return;
@@ -263,11 +277,11 @@ void printGoods(int printTarget)
 {
     printf(
         SEPARATE_RULE
-        "\n商品信息：\n\n"
-        "ID: %ld\t\t名称：%s\n"
-        "原价：%.3f\t\t折扣：%.0f%%\n"
-        "现价：%.3f\n"
-        "总库存：%d\t\t剩余库存：%d\n\n" SEPARATE_RULE,
+        "\nItem details:\n\n"
+        "ID: %ld\t\tName: %s\n"
+        "Original Price: %.3f\tDiscount:%.0f%%\n"
+        "Current Price: %.3f\n"
+        "Amount: %d\t\tRemain: %d\n\n" SEPARATE_RULE,
         goodsInfo[printTarget]->id, goodsInfo[printTarget]->name, goodsInfo[printTarget]->price,
         goodsInfo[printTarget]->discount, goodsInfo[printTarget]->price * (1 - goodsInfo[printTarget]->discount / 100),
         goodsInfo[printTarget]->amount, goodsInfo[printTarget]->remain);
@@ -278,7 +292,7 @@ void printGoods(int printTarget)
 void printGoodsLine(int printTarget)
 {
     printf(
-        "%ld\t%s\t%.3f\t%.3f\t%.3f\t%d\t%d\n",
+        "%ld\t%s\t%f\t%f\t%f\t%d\t%d\n",
         goodsInfo[printTarget]->id, goodsInfo[printTarget]->name, goodsInfo[printTarget]->price,
         goodsInfo[printTarget]->discount, goodsInfo[printTarget]->price * (1 - goodsInfo[printTarget]->discount / 100), goodsInfo[printTarget]->amount, goodsInfo[printTarget]->remain);
 
@@ -319,8 +333,16 @@ void editGoods(void)
     printGoods(editTarget);
 
     char *buffer = malloc((long)MAX_NAME_LENGTH * sizeof(char));
+    if (buffer != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
+        return;
+    }
 
-    printf("请输入新的信息，或按回车键跳过此项\n");
+    printf("Enter the new value, press enter key to skip.\n");
 
     for (int i = 0; i < 6; i++)
     {
@@ -328,8 +350,8 @@ void editGoods(void)
         {
         case 0:
             printf("ID: ");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -337,9 +359,9 @@ void editGoods(void)
             break;
 
         case 1:
-            printf("商品名称：");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            printf("Name: ");
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -347,9 +369,9 @@ void editGoods(void)
             break;
 
         case 2:
-            printf("原价：");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            printf("Price: ");
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -357,9 +379,9 @@ void editGoods(void)
             break;
 
         case 3:
-            printf("折扣(%%): ");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            printf("Discount(%%): ");
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -367,9 +389,9 @@ void editGoods(void)
             break;
 
         case 4:
-            printf("总库存：");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            printf("Amount: ");
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -377,9 +399,9 @@ void editGoods(void)
             break;
 
         case 5:
-            printf("剩余库存：");
-            clearInput();
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+            printf("Remain: ");
+            fflush(stdin);
+            gets(buffer);
             if (*buffer == '\0')
                 break;
             else
@@ -391,7 +413,7 @@ void editGoods(void)
     free(buffer);
     buffer = NULL;
 
-    printf("成功更新商品信息\n");
+    printf("Successfully updated the information.\n");
     printPause();
     return;
 }
@@ -402,19 +424,19 @@ void deleteGoods(void)
 
     if (deleteTarget != MAX_GOODS_KIND)
     {
-        printf("确定要删除这个商品的信息：%s, ID: %ld？（键入Y或y以确认）\n", goodsInfo[deleteTarget]->name, goodsInfo[deleteTarget]->id);
+        printf("Are you sure to delete this item: %s, ID: %ld? (Y/y to confirm)\n", goodsInfo[deleteTarget]->name, goodsInfo[deleteTarget]->id);
         char choice;
-        clearInput();
+        fflush(stdin);
         choice = getchar();
         if (choice == 'Y' || choice == 'y')
         {
             free(goodsInfo[deleteTarget]);
             goodsInfo[deleteTarget] = NULL;
-            printf("删除成功\n");
+            printf("Successfully deleted.\n");
         }
         else
         {
-            printf("已取消删除\n");
+            printf("Delete opreation canceled.\n");
         }
 
         printPause();
@@ -430,7 +452,7 @@ void insertGoods(void)
     {
         if (insertTarget == MAX_GOODS_KIND)
         {
-            printf("严重错误：商品信息库已满\n");
+            printf("Severe Error: Goods library is full.\n");
             printPause();
             return;
         }
@@ -438,8 +460,16 @@ void insertGoods(void)
             ;
     }
     goodsInfo[insertTarget] = (struct info *)malloc((long)sizeof(struct info));
+    if (goodsInfo[insertTarget] != NULL)
+        ;
+    else
+    {
+        printf(SYS_ERROR_MSG);
+        printPause();
+        return;
+    }
 
-    printf("输入新商品的信息：\n");
+    printf("Insert new data: \n");
     for (int i = 0; i < 6; i++)
     {
         switch (i)
@@ -450,51 +480,63 @@ void insertGoods(void)
             break;
 
         case 1:
-            printf("名称：");
-            clearInput();
+            printf("Name: ");
+            fflush(stdin);
             char *buffer = (char *)malloc((long)MAX_NAME_LENGTH * sizeof(char));
+            if (buffer != NULL)
+                ;
+            else
+            {
+                printf(SYS_ERROR_MSG);
+                printPause();
+                free(buffer);
+                buffer = NULL;
+                free(goodsInfo[insertTarget]);
+                goodsInfo[insertTarget] = NULL;
 
-            fgets(buffer, sizeof(char) * MAX_NAME_LENGTH, stdin);
+                return;
+            }
+            gets(buffer);
             strcpy(goodsInfo[insertTarget]->name, buffer);
             free(buffer);
             buffer = NULL;
             break;
 
         case 2:
-            printf("原价：");
+            printf("Price: ");
             scanf("%lf", &(goodsInfo[insertTarget]->price));
             break;
 
         case 3:
-            printf("折扣(%%): ");
+            printf("Discount(%%): ");
             double discountTmp;
             scanf("%lf", &discountTmp);
             if (discountTmp > 100)
             {
-                printf("请检查您的输入，折扣不能超过100%%.\n");
+                printf("Please check out your input, the discount rate can't be larger than 100%%.\n");
                 i--;
             }
             break;
 
         case 4:
-            printf("总库存：");
+            printf("Amount: ");
             scanf("%d", &(goodsInfo[insertTarget]->amount));
             break;
 
         case 5:
-            printf("剩余库存：");
+            printf("Remain: ");
             int remainTmp;
             scanf("%d", &remainTmp);
             if (remainTmp > goodsInfo[insertTarget]->amount)
             {
-                printf("请检查您的输入，剩余库存不能超过总库存 (%d).\n", goodsInfo[insertTarget]->amount);
+                printf("Please check out your input, the number of remain can't be larger than the amount (%d).\n", goodsInfo[insertTarget]->amount);
                 i--;
             }
             break;
         }
     }
 
-    printf("新商品已添加\n");
+    printf("Successfully added the new item.\n");
     printPause();
     return;
 }
@@ -504,14 +546,14 @@ int writeCvs(FILE *pFile)
     FILE *pTmp = fopen(TMP_CSV_PATH, "w");
     if (pTmp == NULL)
     {
-        printf("错误：无法写入文件\n");
+        printf("Error: Cannot write the new file.\n");
         printPause();
         return EXIT_FAILURE;
     }
 
     rewind(pTmp);
 
-    fprintf(pTmp, "ID,名称,原价,折扣(%%),总库存,剩余库存\n");
+    fprintf(pTmp, "ID,Name,Price,Discount(%%),Amount,Remain\n");
     for (int kind = 0; kind < MAX_GOODS_KIND && goodsInfo[kind] != NULL; kind++)
     {
         fprintf(pTmp, "%ld,%s,%.3f,%.3f,%d,%d\n", goodsInfo[kind]->id, goodsInfo[kind]->name,
@@ -523,7 +565,7 @@ int writeCvs(FILE *pFile)
 
     if (fclose(pTmp) == EXIT_FAILURE)
     {
-        printf("错误：不能保存新文件\n");
+        printf("Error: Cannot save the new file.\n");
         pTmp = NULL;
         printPause();
         return EXIT_FAILURE;
@@ -537,7 +579,7 @@ struct shortInfo
 {
     int arrPosition;
     double price;
-} *priceOrder[MAX_GOODS_KIND] = {NULL};
+} * priceOrder[MAX_GOODS_KIND] = {NULL};
 
 void showAllGoods(void)
 {
@@ -545,21 +587,30 @@ void showAllGoods(void)
     for (kindAmount = 0; kindAmount < MAX_GOODS_KIND && goodsInfo[kindAmount] != NULL; kindAmount++)
     {
         priceOrder[kindAmount] = (struct shortInfo *)malloc((long)sizeof(struct shortInfo));
+        if (priceOrder[kindAmount] != NULL)
+            ;
+        else
+        {
+            printf("Error: Sorting process interupted.\n");
+            printPause();
+            goto freeStruct;
+        }
         priceOrder[kindAmount]->price = goodsInfo[kindAmount]->price;
         priceOrder[kindAmount]->arrPosition = kindAmount;
     }
 
-    bubbleSort();
+    quickSortP(0, kindAmount - 1);
 
     printf(
-        "商品信息（按照价格升序）\n" SEPARATE_RULE
-        "ID\t名称\t原价\t折扣(%%)\t现价\t总库存\t剩余库存\n");
+        "Goods details (sorted by original price)\n" SEPARATE_RULE
+        "ID\tName\tOrigianal Price\tDiscount(%%)\tCurrent Price\tAmount\tRemain\n");
     for (int i = 0; i < kindAmount; i++)
     {
         printGoodsLine(priceOrder[i]->arrPosition);
     }
     printPause();
 
+freeStruct:
     for (int i = 0; i < kindAmount; i++)
     {
         free(priceOrder[i]);
@@ -569,28 +620,7 @@ void showAllGoods(void)
     return;
 }
 
-void bubbleSort(void)
-{
-    int goodsAmount;
-    for (goodsAmount = 0; priceOrder[goodsAmount] != NULL; goodsAmount++)
-        ;
-
-    int unsorted = goodsAmount - 1;//behind priceOrder[unsorted] is sorted.
-    for (int i = 1; i < goodsAmount; i++)
-	{
-        int limit = unsorted;
-        for (int j = 0; j <= limit - 1; j++)
-		{
-			if (priceOrder[j]->price > priceOrder[j + 1]->price)
-			{
-                swapStruct(j, j + 1);
-                unsorted = j;
-            }
-		}
-	}
-}
-
-void swapStruct(int a, int b)
+void swapP(int a, int b)
 {
     struct shortInfo *ps;
 
@@ -601,11 +631,68 @@ void swapStruct(int a, int b)
     return;
 }
 
-void clearInput(void)
+int mediumP(int a, int b, int c)
 {
-    char c;
-    while((c = getchar()) != '\n' && c != EOF)
-        ;
+    double aPrice = priceOrder[a]->price, bPrice = priceOrder[b]->price, cPrice = priceOrder[c]->price;
+
+    if ((aPrice - bPrice) * (bPrice - cPrice) >= 0)
+        return b;
+    else
+        return bPrice > cPrice ? (aPrice > cPrice ? a : c) : (aPrice > cPrice ? c : a);
+}
+
+void quickSortP(int left, int right)
+{
+    //if 2 numbers(quicksort cannot solve)
+    if (right - left == 1)
+    {
+        if (priceOrder[left]->price > priceOrder[right]->price)
+        {
+            swapP(left, right);
+            return;
+        }
+        else
+            return;
+    }
+
+    //my quicksort could arrange >=3 numbers
+    //initialize
+    double pivotPrice;
+    int start = left, end = right, gap = right - left;
+    bool next_round = false;
+
+    pivotPrice = priceOrder[mediumP(left, right, (left + right) / 2)]->price;
+
+    //find numbers out of range
+    while (!next_round)
+    {
+        while (gap > 0 && priceOrder[left]->price <= pivotPrice)
+        {
+            left++;
+            gap--;
+        }
+        while (gap > 0 && priceOrder[right]->price >= pivotPrice)
+        {
+            right--;
+            gap--;
+        }
+
+        if (gap == 0)
+        {
+            left--;
+            next_round = true;
+        }
+
+        if (!next_round)
+        {
+            swapP(left, right);
+        }
+    }
+
+    if (left > start)
+        quickSortP(start, left);
+    if (end > right)
+        quickSortP(right, end);
 
     return;
 }
