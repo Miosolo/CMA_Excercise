@@ -1,1 +1,0 @@
-while ( (char c = getchar()) != '\n' && c != EOF ) ;
