@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define SIZE_OF_ARR(arr) sizeof(arr)/sizeof(arr[0])
+#define SIZE_OF_ARR(arr) (sizeof(arr)/sizeof(arr[0]))
 
 int main(void)
 {
