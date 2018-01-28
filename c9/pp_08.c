@@ -1,10 +1,10 @@
 // a simple rolling dice game
 
+#include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>
-#include <ctype.h>
 
 int roll_dice(void);
 bool play_game(void);
@@ -19,15 +19,15 @@ int main(void)
     {
         printf("\n");
         if (play_game())
-            {
-                printf("\n");
-                win++;
-            }
+        {
+            printf("\n");
+            win++;
+        }
         else
-            {
-                printf("\n");
-                loss++;
-            }
+        {
+            printf("\n");
+            loss++;
+        }
     } while (play_again());
 
     printf("\nWins: %d    Losses: %d\n", win, loss);
@@ -59,7 +59,7 @@ bool play_game(void)
     else
     {
         printf("Your point is %d\n", target);
-        while(1)
+        while (1)
         {
             current_roll = roll_dice();
             printf("You rolled %d\n", current_roll);
@@ -81,11 +81,11 @@ bool play_game(void)
 bool play_again(void)
 {
     printf("Play agian? (Y/y for yes)  ");
-    if(tolower(getchar()) == 'y')
-        {
-            fflush(stdin);
-            return true;
-        }
+    if (tolower(getchar()) == 'y')
+    {
+        fflush(stdin);
+        return true;
+    }
 
     fflush(stdin);
     return false;
